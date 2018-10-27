@@ -1,6 +1,10 @@
 //this includes our dotenv file into the program
 require("dotenv").config();
+
 var request = require("request");
+
+//allows for moment functionality
+var moment = require("moment");
 
 //creates a new sportify variable that holds files from the spotify api
 var Spotify = require('node-spotify-api');
@@ -10,7 +14,6 @@ var keys = require('./keys.js');
 
 //create an instance of the spotify variable along with the api keys
 var spotify = new Spotify(keys.spotify);
-
 
 //this will select which function or app we are going to execute
 var selectApp = process.argv[2];
@@ -77,12 +80,19 @@ function getBands() {
 
     request("https://rest.bandsintown.com/artists/" + contentApp + "/events?app_id=400d5aa1c8515365e2be7cf76cfd8ad9", function (error, response, body) {
         if (!error && response.statusCode === 200) {
-            console.log(JSON.parse(body));
+            var temp = JSON.parse(body);
+
+            for (var i = 0; i < temp.length; i++) {
+                console.log("---------------------");
+                console.log("Venue Location: " + temp[i].venue.name);
+                console.log("Location: " + temp[i].venue.city + " " + temp[i].venue.region + " " + temp[i].venue.country);
+                var date = moment(temp[i].venue.datetime).format('MM/DD/YYYY');
+                var time = moment(temp[i].venue.datetime).format('hh:mm a');
+                console.log("Venue Date: " + date + " " + time);
+            }
         }
     });
 }
-
-
 
 function getSpotify() {
     spotify.search({ type: 'track', query: contentApp, limit: 1 }, function (err, data) {
@@ -94,8 +104,6 @@ function getSpotify() {
         console.log("Song Name: " + data.tracks.items[0].name);
         console.log("Preview Link: " + data.tracks.items[0].preview_url);
         console.log("From Album: " + data.tracks.items[0].album.name);
-
-
     });
 }
 
@@ -122,6 +130,7 @@ function initData() {
     //creates a temp variable
     var temp = "";
 
+    //this is a special case if for the bands in town api
     if (selectApp == selectionBands) {
         for (var i = 3; i < selectArray.length; i++) {
 
@@ -132,6 +141,7 @@ function initData() {
             }
         }
     }
+    //if it is not the bands in town api
     else {
         //concatinates if there are arguments passed 3
         for (var i = 3; i < selectArray.length; i++) {
@@ -139,7 +149,6 @@ function initData() {
         }
         //sends back concatination
     }
-    console.log("TEMP: " + temp);
     return temp;
 }
 
