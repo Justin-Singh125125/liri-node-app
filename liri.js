@@ -35,6 +35,9 @@ selectOptions();
 
 
 function getMovie() {
+    if (contentApp == "") {
+        contentApp = "Mr. Nobody";
+    }
     var queryUrl = "http://www.omdbapi.com/?t=" + contentApp + "&y=&plot=short&apikey=trilogy";
 
     request(queryUrl, function (error, response, body) {
@@ -77,11 +80,9 @@ function readFile() {
 
 function getBands() {
 
-
     request("https://rest.bandsintown.com/artists/" + contentApp + "/events?app_id=400d5aa1c8515365e2be7cf76cfd8ad9", function (error, response, body) {
         if (!error && response.statusCode === 200) {
             var temp = JSON.parse(body);
-
             for (var i = 0; i < temp.length; i++) {
                 console.log("---------------------");
                 console.log("Venue Location: " + temp[i].venue.name);
@@ -106,9 +107,6 @@ function getSpotify() {
         console.log("From Album: " + data.tracks.items[0].album.name);
     });
 }
-
-
-
 
 function selectOptions() {
     if (selectApp == selectionSpofity) {
