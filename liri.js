@@ -18,13 +18,15 @@ var selectApp = process.argv[2];
 //this will hold the content to search for in the app
 var selectArray = process.argv;
 //if there is more than one argument for the user choice content, connect them
-var contentApp = initData();
+
 
 //create constant variables for the list of selections
 const selectionSpofity = "spotify-this-song";
 const selectionBands = "concert-this";
 const selectionMovie = "movie-this";
+const doSays = "do-what-it-says";
 
+var contentApp = initData();
 //selects the options 
 selectOptions();
 
@@ -53,12 +55,29 @@ function getMovie() {
     });
 
 }
+function readFile() {
+    var fs = require("fs");
+    fs.readFile("random.txt", "utf8", function (err, data) {
+        if (err) {
+            return console.log(err);
+        }
+
+        //split the data so it turns into an array
+        var dataArray = data.split(",");
+
+        //set our main variables to the content inside the text file
+        selectApp = dataArray[0];
+        contentApp = dataArray[1];
+        getSpotify();
+    })
+}
 
 function getBands() {
 
-    request("http://rest.bandsintown.com/artists/{bruno}/events?app_id=400d5aa1c8515365e2be7cf76cfd8ad9", function (error, response, body) {
+
+    request("https://rest.bandsintown.com/artists/" + contentApp + "/events?app_id=400d5aa1c8515365e2be7cf76cfd8ad9", function (error, response, body) {
         if (!error && response.statusCode === 200) {
-            console.log(body);
+            console.log(JSON.parse(body));
         }
     });
 }
@@ -93,17 +112,34 @@ function selectOptions() {
     if (selectApp == selectionMovie) {
         getMovie();
     }
+    if (selectApp == doSays) {
+        readFile();
+    }
 }
 
 
 function initData() {
     //creates a temp variable
     var temp = "";
-    //concatinates if there are arguments passed 3
-    for (var i = 3; i < selectArray.length; i++) {
-        temp += ` ${selectArray[i]}`;
+
+    if (selectApp == selectionBands) {
+        for (var i = 3; i < selectArray.length; i++) {
+
+            if (i >= (selectArray.length - 1)) {
+                temp += `${selectArray[i]}`
+            } else {
+                temp += `${selectArray[i]}%20`;
+            }
+        }
     }
-    //sends back concatination
+    else {
+        //concatinates if there are arguments passed 3
+        for (var i = 3; i < selectArray.length; i++) {
+            temp += ` ${selectArray[i]}`;
+        }
+        //sends back concatination
+    }
+    console.log("TEMP: " + temp);
     return temp;
 }
 
